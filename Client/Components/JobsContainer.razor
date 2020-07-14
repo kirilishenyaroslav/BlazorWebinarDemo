@@ -1,0 +1,53 @@
+﻿@namespace WebinarBlazorApp.Client.Components
+
+@using Jobs.Models
+@inject HttpClient Http
+
+<div class="container">
+    <div class="row">
+        <div class="jobs-container">
+            <CascadingValue Value="this">
+                @ChildContent
+            </CascadingValue>
+        </div>
+    </div>
+    <hr class="row">
+    <div class="row">
+        <p>Last updated job was: <strong>@lastUpdatedJob</strong></p>
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    public JobModel Payload { get; set; }
+    public List<JobModel> Jobs { get; set; } = new List<JobModel>();
+
+    string lastUpdatedJob = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Jobs = await Http.GetFromJsonAsync<List<JobModel>>("Jobs");
+    }
+
+    public async Task UpdateJobAsync(Jobs.Models.JobStatuses newStatus)
+    {
+        var task = Jobs.SingleOrDefault(x => x.Id == Payload.Id);
+
+        if (task != null)
+        {
+            task.Status = newStatus;
+            task.LastUpdated = DateTime.Now;
+            lastUpdatedJob = task.Description;
+            await Http.PutAsJsonAsync<JobModel>("Jobs", task);
+            await Refresh();
+        }
+    }
+
+    public async Task Refresh()
+    {
+        Jobs = await Http.GetFromJsonAsync<List<JobModel>>("Jobs");
+        await InvokeAsync(StateHasChanged).ConfigureAwait(false);
+    }
+}

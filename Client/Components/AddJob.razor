@@ -1,0 +1,36 @@
+﻿@namespace WebinarBlazorApp.Client.Components
+
+@using Jobs.Models
+@inject HttpClient Http
+
+<div class="simple-form">
+    <div class="form-group">
+        <label for="movie-name">Task Name</label>
+        <input @bind="@NewJob.Description" type="text" class="form-control" id="movie-name" />
+    </div>
+
+    <button @onclick="SaveJob" class="btn btn-primary">Submit</button>
+    <button @onclick="BlazoredModal.Cancel" class="btn btn-secondary">Cancel</button>
+</div>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public JobsContainer Container { get; set; }
+
+    JobModel NewJob { get; set; }
+
+    protected override void OnInitialized()
+    {
+        NewJob = new JobModel();
+        NewJob.Status = JobStatuses.Todo;
+        NewJob.LastUpdated = DateTime.Now;
+    }
+
+    async Task SaveJob()
+    {
+        await Http.PostAsJsonAsync<JobModel>("Jobs", NewJob);
+        await BlazoredModal.Close(ModalResult.Ok<JobModel>(NewJob));
+        await Container?.Refresh();
+    }
+}

@@ -1,0 +1,34 @@
+﻿@namespace WebinarBlazorApp.Client.Components
+
+@using Jobs.Models
+
+@inject HttpClient Http
+
+<div class="simple-form">
+    <div class="form-group">
+        <label for="movie-name">Task Name</label>
+        <input @bind="@CurrentJob.Description" type="text" readonly="readonly" disabled="disabled" class="form-control" id="task-description" />
+    </div>
+    <div class="form-group">
+        <label for="movie-name">Current Status</label>
+        <input @bind="@CurrentJob.Status" type="text" readonly="readonly" disabled="disabled" class="form-control" id="task-status" />
+    </div>
+    <div class="form-group">
+        <label for="movie-name">Last updated</label>
+        <input @bind="@CurrentJob.LastUpdated" type="text" readonly="readonly" disabled="disabled" class="form-control" id="task-last-updated" />
+    </div>
+
+    <button @onclick="BlazoredModal.Cancel" class="btn btn-secondary">Close</button>
+</div>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public JobModel CurrentJob { get; set; }
+
+    async Task SaveJob()
+    {
+        await BlazoredModal.Close(ModalResult.Ok<JobModel>(CurrentJob));
+    }
+}

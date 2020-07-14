@@ -1,0 +1,49 @@
+﻿@page "/"
+
+@namespace WebinarBlazorApp.Client
+
+@using WebinarBlazorApp.Client.Components
+@using Jobs.Models
+
+@inject IModalService Modal
+
+<div class="container">
+    <div class="row">
+        <div style="float:right;">
+            <button class="btn btn-primary" @onclick="@(() => ShowNewJobDialog())">New Task</button>
+        </div>
+    </div>
+    <hr class="row">
+    <div class="row">
+        <JobsContainer @ref="Container">
+
+            <JobList ListStatus="JobStatuses.Todo"
+                     AllowedStatuses="@(new JobStatuses[] { JobStatuses.Started, JobStatuses.Completed })" />
+
+            <JobList ListStatus="JobStatuses.Started"
+                     AllowedStatuses="@(new JobStatuses[] { JobStatuses.Todo})" />
+
+            <JobList ListStatus="JobStatuses.Completed"
+                     AllowedStatuses="@(new JobStatuses[] { JobStatuses.Started })" />
+
+        </JobsContainer>
+    </div>
+</div>
+
+
+
+@code{
+    JobsContainer Container;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    void ShowNewJobDialog()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(AddJob.Container), Container);
+        Modal.Show<AddJob>("Add new task", parameters);
+    }
+}
